@@ -5,10 +5,10 @@
 
 typedef struct
 {
-	void *ret;			 // Return address
-	uint32_t d[8];		 // d0-d7
-	uint32_t a[8];		 // a0-a7
-	uint16_t sr;		 // Status register
+	uint32_t ret;  // Return address
+	uint32_t d[8]; // d0-d7
+	uint32_t a[8]; // a0-a7
+	uint16_t sr;   // Status register
 } m68k_ctx_t;
 
 int m68k_ctx_save(m68k_ctx_t *c);
