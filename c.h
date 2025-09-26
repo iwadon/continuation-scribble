@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#if defined(__human68k__)
+
 typedef struct
 {
 	uint32_t ret;  // Return address
@@ -13,5 +15,7 @@ typedef struct
 
 extern int m68k_ctx_save(m68k_ctx_t *c);
 extern void m68k_ctx_resume(const m68k_ctx_t *c);
+
+#endif // __human68k__
 
 #endif // C_H_INCLUDED
