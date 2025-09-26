@@ -11,7 +11,7 @@ typedef struct
 	uint16_t sr;   // Status register
 } m68k_ctx_t;
 
-int m68k_ctx_save(m68k_ctx_t *c);
-void m68k_ctx_resume(const m68k_ctx_t *c);
+extern int m68k_ctx_save(m68k_ctx_t *c);
+extern void m68k_ctx_resume(const m68k_ctx_t *c);
 
 #endif // C_H_INCLUDED
