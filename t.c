@@ -1,4 +1,4 @@
-#include "c.h"
+#include "m68k_ctx.h"
 #include <stdio.h>
 
 void *stack_base;

@@ -17,7 +17,7 @@ rule ELF
 rule LD
   command = $ld $ldflags -o $out $in $libs
 
-build $builddir/t: LD $builddir/t.o $builddir/c_asm.o.elf
+build $builddir/t: LD $builddir/t.o $builddir/m68k_ctx.o.elf
 build $builddir/t.o: CC t.c
-build $builddir/c_asm.o.elf: ELF $builddir/c_asm.o
-build $builddir/c_asm.o: AS c_asm.s
+build $builddir/m68k_ctx.o.elf: ELF $builddir/m68k_ctx.o
+build $builddir/m68k_ctx.o: AS m68k_ctx.s

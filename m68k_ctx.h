@@ -1,5 +1,5 @@
-#if !defined(C_H_INCLUDED)
-#define C_H_INCLUDED
+#if !defined(M68K_CTX_H_INCLUDED)
+#define M68K_CTX_H_INCLUDED
 
 #include <stdint.h>
 
@@ -18,4 +18,4 @@ extern void m68k_ctx_resume(const m68k_ctx_t *c);
 
 #endif // __human68k__
 
-#endif // C_H_INCLUDED
+#endif // M68K_CTX_H_INCLUDED
