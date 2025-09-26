@@ -1,0 +1,12 @@
+# Language: Cpp
+BasedOnStyle: WebKit
+DerivePointerAlignment: false
+PointerAlignment: Right
+AlignTrailingComments: true
+IndentCaseBlocks: true
+UseTab: Always
+IndentWidth: 4
+TabWidth: 4
+AlwaysBreakBeforeMultilineStrings: true
+NamespaceIndentation: None
+FixNamespaceComments: true
