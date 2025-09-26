@@ -17,7 +17,7 @@ rule ELF
 rule LD
   command = $ld $ldflags -o $out $in $libs
 
-build $builddir/c_test: LD $builddir/c_test.o $builddir/c.o.elf
-build $builddir/c_test.o: CC c_test.c
+build $builddir/t: LD $builddir/t.o $builddir/c.o.elf
+build $builddir/t.o: CC t.c
 build $builddir/c.o.elf: ELF $builddir/c.o
 build $builddir/c.o: AS c.s
