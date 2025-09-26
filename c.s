@@ -9,5 +9,3 @@ _m68k_ctx_save:
 
 _m68k_ctx_resume:
 	rts
-
-	* b86ca
