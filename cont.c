@@ -86,8 +86,34 @@ void cont_resume(const cont_t *cont)
 		abort();
 	}
 	memcpy(p, cont->stack_image, cont->stack_size);
+#if 0
+	uintptr_t old_sp = (uintptr_t)cont->ctx.a[7];
+	uintptr_t new_sp = (uintptr_t)p;
+	uintptr_t base = (uintptr_t)cont_stack_base;
+	uintptr_t delta = new_sp - old_sp;
+
+	m68k_ctx_t ctx = cont->ctx;
+	ctx.a[7] = (uint32_t)new_sp;
+
+	if ((uintptr_t)ctx.a[6] >= old_sp && (uintptr_t)ctx.a[6] < base) {
+		ctx.a[6] = (uint32_t)((uintptr_t)ctx.a[6] + delta);
+
+		uintptr_t fp = (uintptr_t)ctx.a[6];
+		uintptr_t limit = new_sp + cont->stack_size;
+
+		while (fp >= new_sp && fp + 4 <= limit && (fp & 3) == 0) {
+			uint32_t prev_old = *((uint32_t *)fp);
+			if (prev_old < old_sp || prev_old >= base) {
+				break;
+			}
+			*((uint32_t *)fp) = prev_old + (uint32_t)delta;
+			fp = (uintptr_t)(prev_old + (uint32_t)delta);
+		}
+	}
+#else
 	m68k_ctx_t ctx = cont->ctx;
 	ctx.a[7] = (uint32_t)(char *)p;
+#endif
 	m68k_ctx_resume(&ctx);
 }
 
