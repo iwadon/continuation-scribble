@@ -21,3 +21,10 @@ build $builddir/m68k_ctx_test: LD $builddir/m68k_ctx_test.o $builddir/m68k_ctx.o
 build $builddir/m68k_ctx_test.o: CC m68k_ctx_test.c
 build $builddir/m68k_ctx.o.elf: ELF $builddir/m68k_ctx.o
 build $builddir/m68k_ctx.o: AS m68k_ctx.s
+
+build $builddir/cont_test: LD $builddir/cont_test.o $builddir/cont.o $builddir/m68k_ctx.o.elf
+build $builddir/cont_test.o: CC cont_test.c
+build $builddir/cont.o: CC cont.c
+
+build $builddir/cont_clone_test: LD $builddir/cont_clone_test.o $builddir/cont.o $builddir/m68k_ctx.o.elf
+build $builddir/cont_clone_test.o: CC cont_clone_test.c
