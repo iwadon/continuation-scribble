@@ -1,0 +1,20 @@
+builddir = ../build/arm64-apple
+
+cc = gcc
+cflags = -Wall -Wextra -O0 -I .
+as = gcc
+asflags = $cflags -c
+ld = $cc
+ldflags =
+libs =
+
+rule CC
+  command = $cc $cflags -c -o $out $in
+rule AS
+  command = $as $asflags -o $out $in
+rule LD
+  command = $ld $ldflags -o $out $in $libs
+
+build $builddir/arm64_ctx_test: LD $builddir/arm64_ctx_test.o $builddir/arm64_ctx.o
+build $builddir/arm64_ctx_test.o: CC arm64_ctx_test.c
+build $builddir/arm64_ctx.o: AS arm64_ctx.s
