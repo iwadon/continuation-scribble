@@ -1,17 +1,35 @@
 #include "fiber.h"
+#if defined(__APPLE__)
+#include "arm64_ctx.h"
+#elif defined(__human68k__)
 #include "m68k_ctx.h"
+#endif
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
 struct fiber {
+#if defined(__APPLE__)
+	arm64_ctx_t ctx;
+#elif defined(__human68k__)
 	m68k_ctx_t ctx;
+#endif
 	void *stack;
 	size_t stack_size;
 	void (*entry)(void *);
 	void *arg;
 	fib_state_t state;
 };
+
+#if defined(__APPLE__)
+#define ctx_save(c) arm64_ctx_save(c)
+#define ctx_resume(c) arm64_ctx_resume(c)
+#elif defined(__human68k__)
+#define ctx_save(c) m68k_ctx_save(c)
+#define ctx_resume(c) m68k_ctx_resume(c)
+#else
+#error "Unsupported architecture"
+#endif
 
 /* Globals */
 static fiber_t *g_main = 0;
@@ -21,12 +39,21 @@ static fiber_t *g_current = 0;
 void fiber_trampoline(void) __attribute__((noreturn));
 
 /* --- internals --- */
+#if defined(__APPLE__)
+static void fiber_raw_jump(const arm64_ctx_t *c) __attribute__((noreturn));
+static void fiber_raw_jump(const arm64_ctx_t *c)
+{
+	arm64_ctx_resume(c);
+	__builtin_abort();
+}
+#elif defined(__human68k__)
 static void fiber_raw_jump(const m68k_ctx_t *c) __attribute__((noreturn));
 static void fiber_raw_jump(const m68k_ctx_t *c)
 {
 	m68k_ctx_resume(c);
 	__builtin_abort();
 }
+#endif
 
 static void fiber_swap_to(fiber_t *to)
 {
@@ -36,7 +63,7 @@ static void fiber_swap_to(fiber_t *to)
 		/* first ever switch from main */
 		from = g_main;
 	}
-	if (m68k_ctx_save(&from->ctx) == 0) {
+	if (ctx_save(&from->ctx) == 0) {
 		g_current = to;			  /* visible on the other side */
 		fiber_raw_jump(&to->ctx); /* noreturn */
 		abort();
@@ -89,11 +116,19 @@ int fiber_create(fiber_t **out, size_t stack_size, void (*entry)(void *), void *
 	/* Setup initial context: SP at top of stack, PC=fiber_trampoline. */
 	/* NOTE: m68k_ctx_resume clobbers A1 (jump reg) and D0 (retval=1). */
 	memset(&fb->ctx, 0, sizeof(fb->ctx));
+#if defined(__APPLE__)
+	fb->ctx.sp = (uint64_t)(unsigned long)(fb->stack + fb->stack_size);
+	fb->ctx.lr = (uint64_t)(unsigned long)fiber_trampoline;
+	/* Pass entry/arg via X2/X3 (safe w.r.t. arm64_ctx_resume) */
+	fb->ctx.x[2] = (uint64_t)(unsigned long)entry;
+	fb->ctx.x[3] = (uint64_t)(unsigned long)arg;
+#elif defined(__human68k__)
 	fb->ctx.ret = (uint32_t)(void *)fiber_trampoline;
 	fb->ctx.a[7] = (uint32_t)((unsigned long)fb->stack + fb->stack_size);
 	/* Pass entry/arg via A2/D2 (safe w.r.t. m68k_ctx_resume) */
 	fb->ctx.a[2] = (uint32_t)(unsigned long)entry;
 	fb->ctx.d[2] = (uint32_t)(unsigned long)arg;
+#endif
 
 	*out = fb;
 	return 0;
