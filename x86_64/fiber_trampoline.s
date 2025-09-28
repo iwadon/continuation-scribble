@@ -1,21 +1,22 @@
-.globl _fiber_trampoline
-    .text
-    .p2align 2
+	.globl _fiber_trampoline
+
+	.text
+	.p2align 2
 
 _fiber_trampoline:
-    # This is the first entry point for a new fiber.
-    # The context was prepared in fiber_create, with:
-    # - %rbx holding the entry function pointer
-    # - %r12 holding the argument
+	# This is the first entry point for a new fiber.
+	# The context was prepared in fiber_create, with:
+	# - %rbx holding the entry function pointer
+	# - %r12 holding the argument
 
-    # Per System V AMD64 ABI, the first argument is passed in %rdi.
-    movq %r12, %rdi
+	# Per System V AMD64 ABI, the first argument is passed in %rdi.
+	movq %r12, %rdi
 
-    # Call the entry function. The address is in %rbx.
-    call *%rbx
+	# Call the entry function. The address is in %rbx.
+	call *%rbx
 
-    # If the fiber's entry function returns, it should be terminated.
-    call _fiber_mark_done_and_return # This function never returns.
+	# If the fiber''s entry function returns, it should be terminated.
+	call _fiber_mark_done_and_return # This function never returns.
 
-    # Safeguard infinite loop in case noreturn is violated.
-    jmp .
+	# Safeguard infinite loop in case noreturn is violated.
+	jmp .
