@@ -17,9 +17,9 @@ _arm64_ctx_save:
 	str	x1, [x0, #0x60]
 
 	stp	q8, q9, [x0, #0x70]
-	stp	q10, q11, [x0, #0x80]
-	stp	q12, q13, [x0, #0x90]
-	stp	q14, q15, [x0, #0xa0]
+	stp	q10, q11, [x0, #0x90]
+	stp	q12, q13, [x0, #0xb0]
+	stp	q14, q15, [x0, #0xd0]
 
 	mov	w0, #0
 	ret
@@ -37,9 +37,9 @@ _arm64_ctx_resume:
 	mov	sp, x1
 
 	ldp	q8, q9, [x0, #0x70]
-	ldp	q10, q11, [x0, #0x80]
-	ldp	q12, q13, [x0, #0x90]
-	ldp	q14, q15, [x0, #0xa0]
+	ldp	q10, q11, [x0, #0x90]
+	ldp	q12, q13, [x0, #0xb0]
+	ldp	q14, q15, [x0, #0xd0]
 
 	mov	w0, #1
 	ret
