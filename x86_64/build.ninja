@@ -1,0 +1,23 @@
+builddir = ../build/x86_64-apple
+
+cc = gcc
+cflags = -Wall -Wextra -O0 -I . -target x86_64-apple-darwin
+as = gcc
+asflags = -c -target x86_64-apple-darwin
+ld = $cc
+ldflags = -target x86_64-apple-darwin
+libs =
+
+rule CC
+  command = $cc $cflags -c -o $out $in
+rule AS
+  command = $as $asflags -o $out $in
+rule LD
+  command = $ld $ldflags -o $out $in $libs
+
+build $builddir/fiber_test: LD $builddir/fiber_test.o $builddir/fiber.o $builddir/fiber_trampoline.o $builddir/x86_64_ctx.o $builddir/scheduler.o
+build $builddir/fiber_test.o: CC ../fiber_test.c
+build $builddir/fiber.o: CC ../fiber.c
+build $builddir/fiber_trampoline.o: AS fiber_trampoline.s
+build $builddir/scheduler.o: CC ../scheduler.c
+build $builddir/x86_64_ctx.o: AS x86_64_ctx.s
