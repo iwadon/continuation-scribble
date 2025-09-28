@@ -19,7 +19,7 @@ build $builddir/arm64_ctx_test: LD $builddir/arm64_ctx_test.o $builddir/arm64_ct
 build $builddir/arm64_ctx_test.o: CC arm64_ctx_test.c
 build $builddir/arm64_ctx.o: AS arm64_ctx.s
 
-build $builddir/fiber_test.x: LD $builddir/fiber_test.o $builddir/fiber.o $builddir/fiber_trampoline.o $builddir/arm64_ctx.o $builddir/scheduler.o
+build $builddir/fiber_test: LD $builddir/fiber_test.o $builddir/fiber.o $builddir/fiber_trampoline.o $builddir/arm64_ctx.o $builddir/scheduler.o
 build $builddir/fiber_test.o: CC ../fiber_test.c
 build $builddir/fiber.o: CC ../fiber.c
 build $builddir/fiber_trampoline.o: AS fiber_trampoline.s
