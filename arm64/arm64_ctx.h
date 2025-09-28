@@ -10,7 +10,7 @@ typedef struct
 	uint64_t lr;	   // 0x58 X30 (Link Register, Return Address/Resume Point)
 	uint64_t sp;	   // 0x60 SP (Stack Pointer)
 	uint64_t reserved; // 0x68 Reserved for alignment
-	__uint128_t q[10]; // 0x70 Callee-saved Floating Point/Vector Registers (Q8 - Q15) (8 * 16 bytes = 128 bytes)
+	__uint128_t q[8]; // 0x70 Callee-saved Floating Point/Vector Registers (Q8 - Q15) (8 * 16 bytes = 128 bytes)
 } arm64_ctx_t;
 
 extern int arm64_ctx_save(arm64_ctx_t *c);
