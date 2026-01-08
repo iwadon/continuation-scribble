@@ -6,11 +6,26 @@ void cont_panic(const char *msg)
 	printf("Panic: %s\n", msg);
 }
 
-int main(void)
+static void get_stack_base(void)
 {
+#if defined(__APPLE__) && defined(__aarch64__)
+	asm volatile("mov %0, sp" : "=r"(cont_stack_base));
+#elif defined(__human68k__)
 	asm volatile("move.l %%a7, %0" : "=r"(cont_stack_base));
-	cont_panic_fn = cont_panic;
-	cont_t cont;
+#elif defined(__x86_64__)
+	asm volatile("movq %%rsp, %0" : "=r"(cont_stack_base));
+#else
+#error "Unsupported architecture"
+#endif
+}
+
+/*
+ * Continuation must be stored outside the stack area being captured.
+ */
+static cont_t cont;
+
+static void __attribute__((noinline)) run_test(void)
+{
 	cont_init(&cont);
 	printf("cont initialized.\n");
 	if (cont_save(&cont) == 0) {
@@ -21,5 +36,12 @@ int main(void)
 	printf("cont resumed.\n");
 	cont_term(&cont);
 	printf("cont terminated.\n");
+}
+
+int main(void)
+{
+	cont_panic_fn = cont_panic;
+	get_stack_base();
+	run_test();
 	return 0;
 }

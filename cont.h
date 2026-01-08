@@ -1,11 +1,24 @@
 #if !defined(CONT_H_INCLUDED)
 #define CONT_H_INCLUDED
 
-#include "m68k_ctx.h"
 #include <stddef.h>
 
+/* Architecture-specific context type */
+#if defined(__APPLE__) && defined(__aarch64__)
+#include "arm64_ctx.h"
+typedef arm64_ctx_t cont_ctx_t;
+#elif defined(__human68k__)
+#include "m68k_ctx.h"
+typedef m68k_ctx_t cont_ctx_t;
+#elif defined(__x86_64__)
+#include "x86_64/x86_64_ctx.h"
+typedef x86_64_ctx_t cont_ctx_t;
+#else
+#error "Unsupported architecture for continuation"
+#endif
+
 typedef struct {
-	m68k_ctx_t ctx;
+	cont_ctx_t ctx;
 	void *stack_image;
 	size_t stack_size;
 	size_t stack_capacity;

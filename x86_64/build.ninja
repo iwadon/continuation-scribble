@@ -24,3 +24,10 @@ build $builddir/fiber_test.o: CC ../fiber_test.c
 build $builddir/fiber.o: CC ../fiber.c
 build $builddir/fiber_trampoline.o: AS fiber_trampoline.s
 build $builddir/scheduler.o: CC ../scheduler.c
+
+build $builddir/cont_test: LD $builddir/cont_test.o $builddir/cont.o $builddir/x86_64_ctx.o
+build $builddir/cont_test.o: CC ../cont_test.c
+build $builddir/cont.o: CC ../cont.c
+
+build $builddir/cont_clone_test: LD $builddir/cont_clone_test.o $builddir/cont.o $builddir/x86_64_ctx.o
+build $builddir/cont_clone_test.o: CC ../cont_clone_test.c

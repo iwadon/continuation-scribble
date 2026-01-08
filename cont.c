@@ -1,8 +1,25 @@
 #include "cont.h"
-#include "m68k_ctx.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+/* Architecture-specific macros for context operations */
+#if defined(__APPLE__) && defined(__aarch64__)
+#define cont_ctx_save(c) arm64_ctx_save(c)
+#define cont_ctx_resume(c) arm64_ctx_resume(c)
+#define CONT_GET_SP(ctx) ((char *)(uintptr_t)(ctx)->sp)
+#define CONT_SET_SP(ctx, val) ((ctx)->sp = (uint64_t)(uintptr_t)(val))
+#elif defined(__human68k__)
+#define cont_ctx_save(c) m68k_ctx_save(c)
+#define cont_ctx_resume(c) m68k_ctx_resume(c)
+#define CONT_GET_SP(ctx) ((char *)(uintptr_t)(ctx)->a[7])
+#define CONT_SET_SP(ctx, val) ((ctx)->a[7] = (uint32_t)(uintptr_t)(val))
+#elif defined(__x86_64__)
+#define cont_ctx_save(c) x86_64_ctx_save(c)
+#define cont_ctx_resume(c) x86_64_ctx_resume(c)
+#define CONT_GET_SP(ctx) ((char *)(uintptr_t)(ctx)->rsp)
+#define CONT_SET_SP(ctx, val) ((ctx)->rsp = (uint64_t)(uintptr_t)(val))
+#endif
 
 char *cont_stack_base = NULL;
 cont_panic_fn_t cont_panic_fn = NULL;
@@ -45,10 +62,10 @@ int cont_save(cont_t *cont)
 		}
 		abort();
 	}
-	if (m68k_ctx_save(&cont->ctx) != 0) {
+	if (cont_ctx_save(&cont->ctx) != 0) {
 		return 1;
 	}
-	char *sp = (char *)cont->ctx.a[7];
+	char *sp = CONT_GET_SP(&cont->ctx);
 	size_t need = (size_t)(cont_stack_base - sp);
 	if (cont->stack_capacity < need) {
 		size_t new_capacity = cont->stack_capacity > 0 ? cont->stack_capacity : 1024;
@@ -70,6 +87,19 @@ int cont_save(cont_t *cont)
 	return 0;
 }
 
+/*
+ * cont_resume_internal: actual resume logic
+ * This function must be called after moving SP below the restoration area.
+ * Not static because it's called from inline assembly.
+ */
+void __attribute__((noinline)) cont_resume_internal(const cont_t *cont)
+{
+	/* Restore stack image to original location */
+	char *sp = CONT_GET_SP(&cont->ctx);
+	memcpy(sp, cont->stack_image, cont->stack_size);
+	cont_ctx_resume(&cont->ctx);
+}
+
 void cont_resume(const cont_t *cont)
 {
 	if (cont == NULL || cont->stack_image == NULL || cont->stack_size == 0) {
@@ -78,43 +108,45 @@ void cont_resume(const cont_t *cont)
 		}
 		abort();
 	}
-	void *p = malloc(cont->stack_size);
-	if (p == NULL) {
-		if (cont_panic_fn != NULL) {
-			cont_panic_fn("cont_resume: out of memory");
-		}
-		abort();
-	}
-	memcpy(p, cont->stack_image, cont->stack_size);
-#if 0
-	uintptr_t old_sp = (uintptr_t)cont->ctx.a[7];
-	uintptr_t new_sp = (uintptr_t)p;
-	uintptr_t base = (uintptr_t)cont_stack_base;
-	uintptr_t delta = new_sp - old_sp;
+	/*
+	 * Move SP below the area to be restored to avoid corrupting
+	 * our own stack frame during memcpy.
+	 * The target SP is cont->ctx's SP, and we need space below it.
+	 */
+	char *target_sp = CONT_GET_SP(&cont->ctx);
+	size_t guard = cont->stack_size + 4096; /* extra space for safety */
+	char *safe_sp = target_sp - guard;
 
-	m68k_ctx_t ctx = cont->ctx;
-	ctx.a[7] = (uint32_t)new_sp;
-
-	if ((uintptr_t)ctx.a[6] >= old_sp && (uintptr_t)ctx.a[6] < base) {
-		ctx.a[6] = (uint32_t)((uintptr_t)ctx.a[6] + delta);
-
-		uintptr_t fp = (uintptr_t)ctx.a[6];
-		uintptr_t limit = new_sp + cont->stack_size;
-
-		while (fp >= new_sp && fp + 4 <= limit && (fp & 3) == 0) {
-			uint32_t prev_old = *((uint32_t *)fp);
-			if (prev_old < old_sp || prev_old >= base) {
-				break;
-			}
-			*((uint32_t *)fp) = prev_old + (uint32_t)delta;
-			fp = (uintptr_t)(prev_old + (uint32_t)delta);
-		}
-	}
-#else
-	m68k_ctx_t ctx = cont->ctx;
-	ctx.a[7] = (uint32_t)(char *)p;
+{
+	void (*fn)(const cont_t *) = cont_resume_internal;
+#if defined(__APPLE__) && defined(__aarch64__)
+	/* Move SP down and call internal function */
+	asm volatile(
+		"mov sp, %0\n\t"
+		"mov x0, %1\n\t"
+		"blr %2\n\t"
+		:
+		: "r"(safe_sp), "r"(cont), "r"(fn)
+		: "memory");
+#elif defined(__human68k__)
+	asm volatile(
+		"move.l %0, %%sp\n\t"
+		"move.l %1, -(%%sp)\n\t"
+		"jsr (%2)\n\t"
+		:
+		: "r"(safe_sp), "r"(cont), "a"(fn)
+		: "memory");
+#elif defined(__x86_64__)
+	asm volatile(
+		"movq %0, %%rsp\n\t"
+		"movq %1, %%rdi\n\t"
+		"callq *%2\n\t"
+		:
+		: "r"(safe_sp), "r"(cont), "r"(fn)
+		: "memory");
 #endif
-	m68k_ctx_resume(&ctx);
+}
+	__builtin_unreachable();
 }
 
 void cont_clone(cont_t *dst, const cont_t *src)
