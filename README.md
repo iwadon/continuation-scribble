@@ -189,4 +189,4 @@ int main(void) {
 
 ## License
 
-See LICENSE file for details.
+This project is licensed under MIT No Attribution (MIT-0). See [LICENSE](LICENSE) for details.
