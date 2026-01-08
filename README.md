@@ -1,6 +1,8 @@
 # continuation-scribble
 
-Low-level continuation and cooperative fiber (coroutine) library written in C and assembly. Supports multiple CPU architectures.
+**English** | [日本語](README.ja.md)
+
+Experimental project exploring low-level continuation and cooperative fiber (coroutine) implementation in C and assembly. Supports multiple CPU architectures.
 
 ## Supported Architectures
 
