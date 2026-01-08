@@ -15,9 +15,8 @@ _m68k_ctx_save:
 
 _m68k_ctx_resume:
 	movea.l	(4,sp),a0		* a0.l = &ctx
-	move.l	(a0),d1			* d1.l = ctx->ret (一時避難)
 	move.l	(64,a0),a7		* A7 = ctx->a[7]
-	movem.l	(12,a0),d2-d7/a0-a6	* ctx->d[2..7] = D2-D7, ctx->a[0..6] = A0-A6
+	move.l	(a0),-(sp)		* ctx->retをスタックにpush
+	movem.l	(8,a0),d1-d7/a0-a6	* D1-D7, A0-A6を復元
 	moveq.l	#1,d0			* return 1 (復帰側)
-	movea.l	d1,a1			* a1.l = ctx->ret
-	jmp	(a1)			* 保存地点の続きへ
+	rts				* スタックからretをpopしてジャンプ
