@@ -7,7 +7,9 @@ Experimental project exploring low-level continuation and cooperative fiber (cor
 ## Supported Architectures
 
 - **arm64**: Apple Silicon (macOS)
+- **arm64-linux**: ARM64 (Linux)
 - **x86_64**: Intel/AMD (macOS)
+- **x86_64-linux**: Intel/AMD (Linux)
 - **x86_64-win**: Intel/AMD (Windows, MSVC)
 - **m68k**: Motorola 68000 (X68000, cross-compilation)
 
@@ -16,9 +18,11 @@ Experimental project exploring low-level continuation and cooperative fiber (cor
 Each architecture has its own build configuration:
 
 ```bash
-ninja -C arm64      # ARM64 (macOS Apple Silicon)
-ninja -C x86_64     # x86_64 (macOS Intel)
-ninja -C m68k-xelf  # m68k (X68000 cross-compilation)
+ninja -C arm64        # ARM64 (macOS Apple Silicon)
+ninja -C arm64-linux  # ARM64 (Linux)
+ninja -C x86_64       # x86_64 (macOS Intel)
+ninja -C x86_64-linux # x86_64 (Linux)
+ninja -C m68k-xelf    # m68k (X68000 cross-compilation)
 ```
 
 ### Windows (x86_64-win)
@@ -52,6 +56,24 @@ The build script automatically sets up the MSVC environment using `vcvarsall.bat
 ./build/x86_64-apple/fiber_test
 ./build/x86_64-apple/cont_test
 ./build/x86_64-apple/cont_clone_test
+```
+
+### arm64-linux (Linux ARM64)
+
+```bash
+./build/arm64-linux/arm64_ctx_test
+./build/arm64-linux/fiber_test
+./build/arm64-linux/cont_test
+./build/arm64-linux/cont_clone_test
+```
+
+### x86_64-linux (Linux x86_64)
+
+```bash
+./build/x86_64-linux/x86_64_ctx_test
+./build/x86_64-linux/fiber_test
+./build/x86_64-linux/cont_test
+./build/x86_64-linux/cont_clone_test
 ```
 
 ### x86_64-win (Windows)
@@ -159,7 +181,7 @@ The `cont_stack_base` global must be set to mark the top of the stack region to 
 char *cont_stack_base;
 
 static void get_stack_base(void) {
-#if defined(__APPLE__) && defined(__aarch64__)
+#if defined(__aarch64__)
     asm volatile("mov %0, sp" : "=r"(cont_stack_base));
 #elif defined(__human68k__)
     asm volatile("move.l %%a7, %0" : "=r"(cont_stack_base));
