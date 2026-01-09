@@ -4,7 +4,7 @@
 #include <string.h>
 
 /* Architecture-specific macros for context operations */
-#if defined(__APPLE__) && defined(__aarch64__)
+#if defined(__aarch64__)
 #define cont_ctx_save(c) arm64_ctx_save(c)
 #define cont_ctx_resume(c) arm64_ctx_resume(c)
 #define CONT_GET_SP(ctx) ((char *)(uintptr_t)(ctx)->sp)
@@ -129,7 +129,7 @@ void cont_resume(const cont_t *cont)
 
 {
 	void (*fn)(const cont_t *) = cont_resume_internal;
-#if defined(__APPLE__) && defined(__aarch64__)
+#if defined(__aarch64__)
 	/* Move SP down and call internal function */
 	asm volatile(
 		"mov sp, %0\n\t"

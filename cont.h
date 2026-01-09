@@ -4,7 +4,7 @@
 #include <stddef.h>
 
 /* Architecture-specific context type */
-#if defined(__APPLE__) && defined(__aarch64__)
+#if defined(__aarch64__)
 #include "arm64_ctx.h"
 typedef arm64_ctx_t cont_ctx_t;
 #elif defined(__human68k__)

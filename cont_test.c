@@ -8,7 +8,7 @@ void cont_panic(const char *msg)
 
 static void get_stack_base(void)
 {
-#if defined(__APPLE__) && defined(__aarch64__)
+#if defined(__aarch64__)
 	asm volatile("mov %0, sp" : "=r"(cont_stack_base));
 #elif defined(__human68k__)
 	asm volatile("move.l %%a7, %0" : "=r"(cont_stack_base));

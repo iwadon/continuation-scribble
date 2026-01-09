@@ -1,0 +1,33 @@
+builddir = ../build/arm64-linux
+
+cc = gcc
+cflags = -Wall -Wextra -O0 -I .
+as = gcc
+asflags = -c
+ld = $cc
+ldflags =
+libs =
+
+rule CC
+  command = $cc $cflags -c -o $out $in
+rule AS
+  command = $as $asflags -o $out $in
+rule LD
+  command = $ld $ldflags -o $out $in $libs
+
+build $builddir/arm64_ctx_test: LD $builddir/arm64_ctx_test.o $builddir/arm64_ctx.o
+build $builddir/arm64_ctx_test.o: CC arm64_ctx_test.c
+build $builddir/arm64_ctx.o: AS arm64_ctx.s
+
+build $builddir/fiber_test: LD $builddir/fiber_test.o $builddir/fiber.o $builddir/fiber_trampoline.o $builddir/arm64_ctx.o $builddir/scheduler.o
+build $builddir/fiber_test.o: CC ../fiber_test.c
+build $builddir/fiber.o: CC ../fiber.c
+build $builddir/fiber_trampoline.o: AS fiber_trampoline.s
+build $builddir/scheduler.o: CC ../scheduler.c
+
+build $builddir/cont_test: LD $builddir/cont_test.o $builddir/cont.o $builddir/arm64_ctx.o
+build $builddir/cont_test.o: CC ../cont_test.c
+build $builddir/cont.o: CC ../cont.c
+
+build $builddir/cont_clone_test: LD $builddir/cont_clone_test.o $builddir/cont.o $builddir/arm64_ctx.o
+build $builddir/cont_clone_test.o: CC ../cont_clone_test.c
