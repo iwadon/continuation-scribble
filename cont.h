@@ -10,6 +10,9 @@ typedef arm64_ctx_t cont_ctx_t;
 #elif defined(__human68k__)
 #include "m68k_ctx.h"
 typedef m68k_ctx_t cont_ctx_t;
+#elif defined(_WIN64)
+#include "x86_64-win/x86_64_ctx.h"
+typedef x86_64_ctx_t cont_ctx_t;
 #elif defined(__x86_64__)
 #include "x86_64/x86_64_ctx.h"
 typedef x86_64_ctx_t cont_ctx_t;
@@ -32,7 +35,12 @@ extern cont_panic_fn_t cont_panic_fn;
 extern void cont_init(cont_t *cont);
 extern void cont_term(cont_t *cont);
 extern int cont_save(cont_t *cont);
-__attribute__((noreturn)) extern void cont_resume(const cont_t *cont);
+#ifdef _MSC_VER
+__declspec(noreturn)
+#else
+__attribute__((noreturn))
+#endif
+extern void cont_resume(const cont_t *cont);
 extern void cont_clone(cont_t *dst, const cont_t *src);
 
 #endif // !defined(CONT_H_INCLUDED)

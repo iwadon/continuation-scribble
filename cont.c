@@ -14,7 +14,7 @@
 #define cont_ctx_resume(c) m68k_ctx_resume(c)
 #define CONT_GET_SP(ctx) ((char *)(uintptr_t)(ctx)->a[7])
 #define CONT_SET_SP(ctx, val) ((ctx)->a[7] = (uint32_t)(uintptr_t)(val))
-#elif defined(__x86_64__)
+#elif defined(_WIN64) || defined(__x86_64__)
 #define cont_ctx_save(c) x86_64_ctx_save(c)
 #define cont_ctx_resume(c) x86_64_ctx_resume(c)
 #define CONT_GET_SP(ctx) ((char *)(uintptr_t)(ctx)->rsp)
@@ -90,15 +90,25 @@ int cont_save(cont_t *cont)
 /*
  * cont_resume_internal: actual resume logic
  * This function must be called after moving SP below the restoration area.
- * Not static because it's called from inline assembly.
+ * Not static because it's called from inline assembly (or MASM trampoline).
  */
+#ifdef _MSC_VER
+__declspec(noinline) void cont_resume_internal(const cont_t *cont)
+#else
 void __attribute__((noinline)) cont_resume_internal(const cont_t *cont)
+#endif
 {
 	/* Restore stack image to original location */
 	char *sp = CONT_GET_SP(&cont->ctx);
 	memcpy(sp, cont->stack_image, cont->stack_size);
 	cont_ctx_resume(&cont->ctx);
 }
+
+#ifdef _WIN64
+/* External trampoline function defined in cont_trampoline.asm for Windows */
+extern void cont_resume_trampoline(char *safe_sp, const cont_t *cont,
+	void (*fn)(const cont_t *));
+#endif
 
 void cont_resume(const cont_t *cont)
 {
@@ -136,6 +146,9 @@ void cont_resume(const cont_t *cont)
 		:
 		: "r"(safe_sp), "r"(cont), "a"(fn)
 		: "memory");
+#elif defined(_WIN64)
+	/* Use external MASM trampoline since MSVC doesn't support inline asm */
+	cont_resume_trampoline(safe_sp, cont, fn);
 #elif defined(__x86_64__)
 	asm volatile(
 		"movq %0, %%rsp\n\t"
@@ -146,7 +159,12 @@ void cont_resume(const cont_t *cont)
 		: "memory");
 #endif
 }
+#ifdef _MSC_VER
+	/* unreachable */
+	for (;;) {}
+#else
 	__builtin_unreachable();
+#endif
 }
 
 void cont_clone(cont_t *dst, const cont_t *src)

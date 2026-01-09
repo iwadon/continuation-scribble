@@ -3,6 +3,8 @@
 #include "arm64_ctx.h"
 #elif defined(__human68k__)
 #include "m68k_ctx.h"
+#elif defined(_WIN64)
+#include "x86_64-win/x86_64_ctx.h"
 #elif defined(__x86_64__)
 #include "x86_64/x86_64_ctx.h"
 #endif
@@ -15,7 +17,7 @@ struct fiber {
 	arm64_ctx_t ctx;
 #elif defined(__human68k__)
 	m68k_ctx_t ctx;
-#elif defined(__x86_64__)
+#elif defined(_WIN64) || defined(__x86_64__)
 	x86_64_ctx_t ctx;
 #endif
 	void *stack;
@@ -31,7 +33,7 @@ struct fiber {
 #elif defined(__human68k__)
 #define ctx_save(c) m68k_ctx_save(c)
 #define ctx_resume(c) m68k_ctx_resume(c)
-#elif defined(__x86_64__)
+#elif defined(_WIN64) || defined(__x86_64__)
 #define ctx_save(c) x86_64_ctx_save(c)
 #define ctx_resume(c) x86_64_ctx_resume(c)
 #else
@@ -43,7 +45,11 @@ static fiber_t *g_main = 0;
 static fiber_t *g_current = 0;
 
 /* ASM trampoline (first entry) */
+#ifdef _MSC_VER
+__declspec(noreturn) void fiber_trampoline(void);
+#else
 void fiber_trampoline(void) __attribute__((noreturn));
+#endif
 
 /* --- internals --- */
 #if defined(__APPLE__) && defined(__aarch64__)
@@ -60,12 +66,20 @@ static void fiber_raw_jump(const m68k_ctx_t *c)
 	m68k_ctx_resume(c);
 	__builtin_abort();
 }
-#elif defined(__x86_64__)
+#elif defined(_WIN64) || defined(__x86_64__)
+#ifdef _MSC_VER
+__declspec(noreturn) static void fiber_raw_jump(const x86_64_ctx_t *c);
+#else
 static void fiber_raw_jump(const x86_64_ctx_t *c) __attribute__((noreturn));
+#endif
 static void fiber_raw_jump(const x86_64_ctx_t *c)
 {
 	x86_64_ctx_resume(c);
+#ifdef _MSC_VER
+	abort();
+#else
 	__builtin_abort();
+#endif
 }
 #endif
 
@@ -141,14 +155,14 @@ int fiber_create(fiber_t **out, size_t stack_size, void (*entry)(void *), void *
 	/* Pass entry/arg via A2/D2 (safe w.r.t. m68k_ctx_resume) */
 	fb->ctx.a[2] = (uint32_t)(unsigned long)entry;
 	fb->ctx.d[2] = (uint32_t)(unsigned long)arg;
-#elif defined(__x86_64__)
-    fb->ctx.rip = (uint64_t)fiber_trampoline;
+#elif defined(_WIN64) || defined(__x86_64__)
+    fb->ctx.rip = (uint64_t)(uintptr_t)fiber_trampoline;
     fb->ctx.rsp = (uint64_t)((uint8_t *)fb->stack + fb->stack_size);
     // Align stack to 16 bytes, then push a dummy return address for 16-byte alignment before call
-    fb->ctx.rsp -= 8; 
+    fb->ctx.rsp -= 8;
     // Pass entry and arg via callee-saved registers
-    fb->ctx.rbx = (uint64_t)entry;
-    fb->ctx.r12 = (uint64_t)arg;
+    fb->ctx.rbx = (uint64_t)(uintptr_t)entry;
+    fb->ctx.r12 = (uint64_t)(uintptr_t)arg;
 #endif
 
 	*out = fb;

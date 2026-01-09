@@ -8,17 +8,31 @@ Experimental project exploring low-level continuation and cooperative fiber (cor
 
 - **arm64**: Apple Silicon (macOS)
 - **x86_64**: Intel/AMD (macOS)
+- **x86_64-win**: Intel/AMD (Windows, MSVC)
 - **m68k**: Motorola 68000 (X68000, cross-compilation)
 
 ## Build Instructions
 
-Each architecture has its own ninja build configuration:
+Each architecture has its own build configuration:
 
 ```bash
 ninja -C arm64      # ARM64 (macOS Apple Silicon)
 ninja -C x86_64     # x86_64 (macOS Intel)
 ninja -C m68k-xelf  # m68k (X68000 cross-compilation)
 ```
+
+### Windows (x86_64-win)
+
+Requires Visual Studio with C++ workload installed.
+
+```cmd
+cd x86_64-win
+build_msvc.bat          # Build x86_64_ctx_test.exe (default)
+build_msvc.bat all      # Build all tests
+build_msvc.bat clean    # Clean build artifacts
+```
+
+The build script automatically sets up the MSVC environment using `vcvarsall.bat`.
 
 ## Running Tests
 
@@ -38,6 +52,15 @@ ninja -C m68k-xelf  # m68k (X68000 cross-compilation)
 ./build/x86_64-apple/fiber_test
 ./build/x86_64-apple/cont_test
 ./build/x86_64-apple/cont_clone_test
+```
+
+### x86_64-win (Windows)
+
+```cmd
+build\x86_64-win\x86_64_ctx_test.exe
+build\x86_64-win\fiber_test.exe
+build\x86_64-win\cont_test.exe
+build\x86_64-win\cont_clone_test.exe
 ```
 
 ### m68k (requires run68 emulator)
@@ -140,6 +163,8 @@ static void get_stack_base(void) {
     asm volatile("mov %0, sp" : "=r"(cont_stack_base));
 #elif defined(__human68k__)
     asm volatile("move.l %%a7, %0" : "=r"(cont_stack_base));
+#elif defined(_MSC_VER) && defined(_WIN64)
+    cont_stack_base = (char *)_AddressOfReturnAddress();
 #elif defined(__x86_64__)
     asm volatile("movq %%rsp, %0" : "=r"(cont_stack_base));
 #endif
