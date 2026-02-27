@@ -35,3 +35,7 @@ build $builddir/fiber.o: CC ../fiber.c
 build $builddir/fiber_trampoline.o.elf: ELF $builddir/fiber_trampoline.o
 build $builddir/fiber_trampoline.o: AS fiber_trampoline.s
 build $builddir/scheduler.o: CC ../scheduler.c
+
+build $builddir/eff_test.x: LD $builddir/eff_test.o $builddir/eff.o $builddir/cont.o $builddir/m68k_ctx.o.elf
+build $builddir/eff_test.o: CC ../eff_test.c
+build $builddir/eff.o: CC ../eff.c
