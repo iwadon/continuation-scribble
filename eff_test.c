@@ -1,6 +1,10 @@
 #include "eff.h"
 #include <stdio.h>
 
+#if defined(_MSC_VER)
+#include <intrin.h>
+#endif
+
 static void cont_panic(const char *msg)
 {
 	printf("Panic: %s\n", msg);
@@ -10,6 +14,8 @@ static void get_stack_base(void)
 {
 #if defined(__aarch64__)
 	asm volatile("mov %0, sp" : "=r"(cont_stack_base));
+#elif defined(_MSC_VER) && defined(_M_X64)
+	cont_stack_base = (char *)_AddressOfReturnAddress();
 #elif defined(__x86_64__)
 	asm volatile("movq %%rsp, %0" : "=r"(cont_stack_base));
 #elif defined(__human68k__)
@@ -34,7 +40,12 @@ static intptr_t safe_div(intptr_t a, intptr_t b)
 
 static eff_handler_t h1;
 
-static void __attribute__((noinline)) test1(void)
+#ifdef _MSC_VER
+__declspec(noinline)
+#else
+__attribute__((noinline))
+#endif
+static void test1(void)
 {
 	printf("=== Test 1: Exception effect ===\n");
 
@@ -70,7 +81,12 @@ static void fib_generator(void)
 static eff_handler_t h2;
 static int gen_done;
 
-static void __attribute__((noinline)) test2(void)
+#ifdef _MSC_VER
+__declspec(noinline)
+#else
+__attribute__((noinline))
+#endif
+static void test2(void)
 {
 	printf("=== Test 2: Generator effect ===\n");
 
@@ -126,7 +142,12 @@ static intptr_t state_val;
 static intptr_t comp_result;
 static int comp_done;
 
-static void __attribute__((noinline)) test3(void)
+#ifdef _MSC_VER
+__declspec(noinline)
+#else
+__attribute__((noinline))
+#endif
+static void test3(void)
 {
 	printf("=== Test 3: State effect ===\n");
 

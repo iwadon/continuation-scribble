@@ -5,6 +5,8 @@
 
 #if defined(__GNUC__)
 #define FIBER_NORETURN __attribute__((noreturn))
+#elif defined(_MSC_VER)
+#define FIBER_NORETURN __declspec(noreturn)
 #else
 #define FIBER_NORETURN
 #endif

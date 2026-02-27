@@ -48,13 +48,18 @@ build $builddir/scheduler.obj: CC ../scheduler.c
 
 # cont_test - continuation save/resume test
 build $builddir/cont_test.exe: LD $builddir/cont_test.obj $builddir/cont.obj $builddir/x86_64_ctx.obj $builddir/cont_trampoline.obj
-build $builddir/cont_test.obj: CC cont_test.c
+build $builddir/cont_test.obj: CC ../cont_test.c
 build $builddir/cont.obj: CC ../cont.c
 build $builddir/cont_trampoline.obj: AS cont_trampoline.asm
 
 # cont_clone_test - continuation clone test
 build $builddir/cont_clone_test.exe: LD $builddir/cont_clone_test.obj $builddir/cont.obj $builddir/x86_64_ctx.obj $builddir/cont_trampoline.obj
-build $builddir/cont_clone_test.obj: CC cont_clone_test.c
+build $builddir/cont_clone_test.obj: CC ../cont_clone_test.c
+
+# eff_test - algebraic effects test
+build $builddir/eff_test.exe: LD $builddir/eff_test.obj $builddir/eff.obj $builddir/cont.obj $builddir/x86_64_ctx.obj $builddir/cont_trampoline.obj
+build $builddir/eff_test.obj: CC ../eff_test.c
+build $builddir/eff.obj: CC ../eff.c
 
 # Default target
 default $builddir/x86_64_ctx_test.exe

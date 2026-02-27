@@ -61,6 +61,8 @@ if errorlevel 1 goto end
 call :build_cont_test
 if errorlevel 1 goto end
 call :build_cont_clone_test
+if errorlevel 1 goto end
+call :build_eff_test
 goto end
 
 :clean
@@ -121,7 +123,7 @@ cl /nologo /W4 /Od /Zi /I "%SRCDIR%" /c /Fo"%BUILDDIR%\cont.obj" "%ROOTDIR%\cont
 if errorlevel 1 exit /b 1
 
 echo [CC] cont_test.c
-cl /nologo /W4 /Od /Zi /I "%SRCDIR%" /c /Fo"%BUILDDIR%\cont_test.obj" "%SRCDIR%\cont_test.c"
+cl /nologo /W4 /Od /Zi /I "%SRCDIR%" /c /Fo"%BUILDDIR%\cont_test.obj" "%ROOTDIR%\cont_test.c"
 if errorlevel 1 exit /b 1
 
 echo [LINK] cont_test.exe
@@ -133,7 +135,7 @@ exit /b 0
 
 :build_cont_clone_test
 echo [CC] cont_clone_test.c
-cl /nologo /W4 /Od /Zi /I "%SRCDIR%" /c /Fo"%BUILDDIR%\cont_clone_test.obj" "%SRCDIR%\cont_clone_test.c"
+cl /nologo /W4 /Od /Zi /I "%SRCDIR%" /c /Fo"%BUILDDIR%\cont_clone_test.obj" "%ROOTDIR%\cont_clone_test.c"
 if errorlevel 1 exit /b 1
 
 echo [LINK] cont_clone_test.exe
@@ -141,6 +143,22 @@ link /nologo /DEBUG /OUT:"%BUILDDIR%\cont_clone_test.exe" "%BUILDDIR%\cont_clone
 if errorlevel 1 exit /b 1
 
 echo cont_clone_test.exe built successfully.
+exit /b 0
+
+:build_eff_test
+echo [CC] eff.c
+cl /nologo /W4 /Od /Zi /I "%SRCDIR%" /c /Fo"%BUILDDIR%\eff.obj" "%ROOTDIR%\eff.c"
+if errorlevel 1 exit /b 1
+
+echo [CC] eff_test.c
+cl /nologo /W4 /Od /Zi /I "%SRCDIR%" /c /Fo"%BUILDDIR%\eff_test.obj" "%ROOTDIR%\eff_test.c"
+if errorlevel 1 exit /b 1
+
+echo [LINK] eff_test.exe
+link /nologo /DEBUG /OUT:"%BUILDDIR%\eff_test.exe" "%BUILDDIR%\eff_test.obj" "%BUILDDIR%\eff.obj" "%BUILDDIR%\cont.obj" "%BUILDDIR%\x86_64_ctx.obj" "%BUILDDIR%\cont_trampoline.obj"
+if errorlevel 1 exit /b 1
+
+echo eff_test.exe built successfully.
 exit /b 0
 
 :end

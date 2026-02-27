@@ -2,6 +2,10 @@
 #include "cont.h"
 #include <stdio.h>
 
+#if defined(_MSC_VER)
+#include <intrin.h>
+#endif
+
 static void cont_panic(const char *msg) { printf("Panic: %s\n", msg); }
 
 static void get_stack_base(void)
@@ -10,6 +14,8 @@ static void get_stack_base(void)
 	asm volatile("mov %0, sp" : "=r"(cont_stack_base));
 #elif defined(__human68k__)
 	asm volatile("move.l %%a7, %0" : "=r"(cont_stack_base));
+#elif defined(_MSC_VER) && defined(_M_X64)
+	cont_stack_base = (char *)_AddressOfReturnAddress();
 #elif defined(__x86_64__)
 	asm volatile("movq %%rsp, %0" : "=r"(cont_stack_base));
 #else
@@ -28,7 +34,12 @@ static int resume_count = 0;
  * Run the actual test in a separate function so that the stack frame
  * is properly captured between cont_stack_base and the cont_save point.
  */
-static void __attribute__((noinline)) run_test(void)
+#ifdef _MSC_VER
+__declspec(noinline)
+#else
+__attribute__((noinline))
+#endif
+static void run_test(void)
 {
 	cont_init(&base);
 	cont_init(&c1);

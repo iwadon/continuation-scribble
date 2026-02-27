@@ -83,6 +83,7 @@ build\x86_64-win\x86_64_ctx_test.exe
 build\x86_64-win\fiber_test.exe
 build\x86_64-win\cont_test.exe
 build\x86_64-win\cont_clone_test.exe
+build\x86_64-win\eff_test.exe
 ```
 
 ### m68k (run68エミュレータが必要)

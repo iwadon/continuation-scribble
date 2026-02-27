@@ -4,6 +4,10 @@
 #include "cont.h"
 #include <stdint.h>
 
+#if defined(_MSC_VER)
+#include <intrin.h>
+#endif
+
 /* --- Algebraic Effects for C using delimited continuations --- */
 
 /* Handler frame: linked list forming a handler stack */
@@ -29,6 +33,8 @@ extern intptr_t eff_resume_val;
  * Must be a macro, not a function, to read the caller's SP even at -O0. */
 #if defined(__aarch64__)
 #define EFF_GET_SP(dst) asm volatile("mov %0, sp" : "=r"(dst))
+#elif defined(_MSC_VER) && defined(_M_X64)
+#define EFF_GET_SP(dst) ((dst) = (char *)_AddressOfReturnAddress())
 #elif defined(__x86_64__)
 #define EFF_GET_SP(dst) asm volatile("movq %%rsp, %0" : "=r"(dst))
 #elif defined(__human68k__)
@@ -47,7 +53,12 @@ intptr_t eff_perform(int tag, intptr_t arg);
  * eff_resume(k, val) — resume a captured continuation with a value.
  * Does not return (noreturn).
  */
-__attribute__((noreturn)) void eff_resume(eff_cont_t *k, intptr_t val);
+#if defined(_MSC_VER)
+__declspec(noreturn)
+#else
+__attribute__((noreturn))
+#endif
+void eff_resume(eff_cont_t *k, intptr_t val);
 
 /*
  * eff_handle_end(h) — pop handler, restore cont_stack_base, clean up.
