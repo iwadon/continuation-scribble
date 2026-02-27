@@ -60,6 +60,3 @@ build $builddir/cont_clone_test.obj: CC ../cont_clone_test.c
 build $builddir/eff_test.exe: LD $builddir/eff_test.obj $builddir/eff.obj $builddir/cont.obj $builddir/arm64_ctx.obj $builddir/cont_trampoline.obj
 build $builddir/eff_test.obj: CC ../eff_test.c
 build $builddir/eff.obj: CC ../eff.c
-
-# Default target
-default $builddir/arm64_ctx_test.exe
