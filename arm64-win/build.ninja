@@ -16,7 +16,7 @@ cflags = /nologo /W4 /Od /Zi /FS /utf-8 /I .
 
 # ARM64 assembler
 as = armasm64
-asflags = /nologo
+asflags = -nologo -g
 
 # Linker (use link.exe explicitly to avoid conflict with Unix link command)
 ld = link.exe
