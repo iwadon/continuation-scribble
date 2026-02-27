@@ -6,8 +6,9 @@
 
 ## サポートアーキテクチャ
 
-- **arm64**: Apple Silicon (macOS)
+- **arm64-mac**: Apple Silicon (macOS)
 - **arm64-linux**: ARM64 (Linux)
+- **arm64-win**: ARM64 (Windows)
 - **x86_64**: Intel/AMD (macOS)
 - **x86_64-linux**: Intel/AMD (Linux)
 - **x86_64-win**: Intel/AMD (Windows, MSVC)
@@ -18,10 +19,12 @@
 各アーキテクチャごとにninjaビルド設定があります：
 
 ```bash
-ninja -C arm64        # ARM64 (macOS Apple Silicon)
+ninja -C arm64-mac    # ARM64 (macOS Apple Silicon)
 ninja -C arm64-linux  # ARM64 (Linux)
+ninja -C arm64-win    # ARM64 (Windows)
 ninja -C x86_64       # x86_64 (macOS Intel)
 ninja -C x86_64-linux # x86_64 (Linux)
+ninja -C x86_64-win   # x86_64 (Windows)
 ninja -C m68k-xelf    # m68k (X68000 クロスコンパイル)
 ```
 
@@ -43,19 +46,19 @@ build_msvc.bat clean    # ビルド成果物をクリーン
 ### arm64 (Apple Silicon上でネイティブ実行)
 
 ```bash
-./build/arm64-apple/arm64_ctx_test
-./build/arm64-apple/fiber_test
-./build/arm64-apple/cont_test
-./build/arm64-apple/cont_clone_test
+./build/arm64-mac/arm64_ctx_test
+./build/arm64-mac/fiber_test
+./build/arm64-mac/cont_test
+./build/arm64-mac/cont_clone_test
 ```
 
 ### x86_64 (ネイティブまたはRosetta 2)
 
 ```bash
-./build/x86_64-apple/x86_64_ctx_test
-./build/x86_64-apple/fiber_test
-./build/x86_64-apple/cont_test
-./build/x86_64-apple/cont_clone_test
+./build/x86_64-mac/x86_64_ctx_test
+./build/x86_64-mac/fiber_test
+./build/x86_64-mac/cont_test
+./build/x86_64-mac/cont_clone_test
 ```
 
 ### arm64-linux (Linux ARM64)

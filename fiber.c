@@ -1,14 +1,10 @@
 #include "fiber.h"
-#if defined(_M_ARM64)
-#include "arm64-win/arm64_ctx.h"
-#elif defined(__aarch64__)
+#if defined(_M_ARM64) || defined(__aarch64__)
 #include "arm64_ctx.h"
 #elif defined(__human68k__)
 #include "m68k_ctx.h"
-#elif defined(_WIN64)
-#include "x86_64-win/x86_64_ctx.h"
-#elif defined(__x86_64__)
-#include "x86_64/x86_64_ctx.h"
+#elif defined(_WIN64) || defined(__x86_64__)
+#include "x86_64_ctx.h"
 #endif
 #include <assert.h>
 #include <stdlib.h>
@@ -171,13 +167,13 @@ int fiber_create(fiber_t **out, size_t stack_size, void (*entry)(void *), void *
 	fb->ctx.a[2] = (uint32_t)(unsigned long)entry;
 	fb->ctx.d[2] = (uint32_t)(unsigned long)arg;
 #elif defined(_WIN64) || defined(__x86_64__)
-    fb->ctx.rip = (uint64_t)(uintptr_t)fiber_trampoline;
-    fb->ctx.rsp = (uint64_t)((uint8_t *)fb->stack + fb->stack_size);
-    // Align stack to 16 bytes, then push a dummy return address for 16-byte alignment before call
-    fb->ctx.rsp -= 8;
-    // Pass entry and arg via callee-saved registers
-    fb->ctx.rbx = (uint64_t)(uintptr_t)entry;
-    fb->ctx.r12 = (uint64_t)(uintptr_t)arg;
+	fb->ctx.rip = (uint64_t)(uintptr_t)fiber_trampoline;
+	fb->ctx.rsp = (uint64_t)((uint8_t *)fb->stack + fb->stack_size);
+	// Align stack to 16 bytes, then push a dummy return address for 16-byte alignment before call
+	fb->ctx.rsp -= 8;
+	// Pass entry and arg via callee-saved registers
+	fb->ctx.rbx = (uint64_t)(uintptr_t)entry;
+	fb->ctx.r12 = (uint64_t)(uintptr_t)arg;
 #endif
 
 	*out = fb;

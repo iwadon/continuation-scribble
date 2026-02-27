@@ -4,20 +4,14 @@
 #include <stddef.h>
 
 /* Architecture-specific context type */
-#if defined(_M_ARM64)
-#include "arm64-win/arm64_ctx.h"
-typedef arm64_ctx_t cont_ctx_t;
-#elif defined(__aarch64__)
+#if defined(_M_ARM64) || defined(__aarch64__)
 #include "arm64_ctx.h"
 typedef arm64_ctx_t cont_ctx_t;
 #elif defined(__human68k__)
 #include "m68k_ctx.h"
 typedef m68k_ctx_t cont_ctx_t;
-#elif defined(_WIN64)
-#include "x86_64-win/x86_64_ctx.h"
-typedef x86_64_ctx_t cont_ctx_t;
-#elif defined(__x86_64__)
-#include "x86_64/x86_64_ctx.h"
+#elif defined(_WIN64) || defined(__x86_64__)
+#include "x86_64_ctx.h"
 typedef x86_64_ctx_t cont_ctx_t;
 #else
 #error "Unsupported architecture for continuation"

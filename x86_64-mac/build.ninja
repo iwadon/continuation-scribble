@@ -1,4 +1,4 @@
-builddir = ../build/x86_64-apple
+builddir = ../build/x86_64-mac
 
 cc = gcc
 cflags = -Wall -Wextra -O0 -I . -target x86_64-apple-darwin

@@ -6,22 +6,25 @@ Experimental project exploring low-level continuation and cooperative fiber (cor
 
 ## Supported Architectures
 
-- **arm64**: Apple Silicon (macOS)
+- **arm64-mac**: Apple Silicon (macOS)
 - **arm64-linux**: ARM64 (Linux)
-- **x86_64**: Intel/AMD (macOS)
+- **arm64-win**: ARM64 (Windows)
+- **x86_64-mac**: Intel/AMD (macOS)
 - **x86_64-linux**: Intel/AMD (Linux)
 - **x86_64-win**: Intel/AMD (Windows, MSVC)
-- **m68k**: Motorola 68000 (X68000, cross-compilation)
+- **m68k-xelf**: Motorola 68000 (X68000, cross-compilation)
 
 ## Build Instructions
 
 Each architecture has its own build configuration:
 
 ```bash
-ninja -C arm64        # ARM64 (macOS Apple Silicon)
+ninja -C arm64-mac    # ARM64 (macOS Apple Silicon)
 ninja -C arm64-linux  # ARM64 (Linux)
-ninja -C x86_64       # x86_64 (macOS Intel)
+ninja -C arm64-win    # ARM64 (Windows)
+ninja -C x86_64-mac   # x86_64 (macOS Intel)
 ninja -C x86_64-linux # x86_64 (Linux)
+ninja -C x86_64-win   # x86_64 (Windows)
 ninja -C m68k-xelf    # m68k (X68000 cross-compilation)
 ```
 
@@ -30,6 +33,7 @@ ninja -C m68k-xelf    # m68k (X68000 cross-compilation)
 Requires Visual Studio with C++ workload installed.
 
 ```cmd
+
 cd x86_64-win
 build_msvc.bat          # Build x86_64_ctx_test.exe (default)
 build_msvc.bat all      # Build all tests
@@ -43,19 +47,19 @@ The build script automatically sets up the MSVC environment using `vcvarsall.bat
 ### arm64 (native on Apple Silicon)
 
 ```bash
-./build/arm64-apple/arm64_ctx_test
-./build/arm64-apple/fiber_test
-./build/arm64-apple/cont_test
-./build/arm64-apple/cont_clone_test
+./build/arm64-mac/arm64_ctx_test
+./build/arm64-mac/fiber_test
+./build/arm64-mac/cont_test
+./build/arm64-mac/cont_clone_test
 ```
 
 ### x86_64 (native or Rosetta 2)
 
 ```bash
-./build/x86_64-apple/x86_64_ctx_test
-./build/x86_64-apple/fiber_test
-./build/x86_64-apple/cont_test
-./build/x86_64-apple/cont_clone_test
+./build/x86_64-mac/x86_64_ctx_test
+./build/x86_64-mac/fiber_test
+./build/x86_64-mac/cont_test
+./build/x86_64-mac/cont_clone_test
 ```
 
 ### arm64-linux (Linux ARM64)
