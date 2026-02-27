@@ -23,7 +23,7 @@ ld = link.exe
 ldflags = /nologo /DEBUG
 
 rule CC
-  command = $cc $cflags /c /Fo$out $in
+  command = $cc $cflags /c /Fd$builddir/ /Fo$out $in
   description = CC $in
 
 rule AS
