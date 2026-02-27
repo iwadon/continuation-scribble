@@ -12,7 +12,7 @@ builddir = ../build/x86_64-win
 
 # MSVC compiler
 cc = cl
-cflags = /nologo /W4 /Od /Zi /I .
+cflags = /nologo /W4 /Od /Zi /FS /utf-8 /I .
 
 # MASM assembler (ml64 for x64)
 as = ml64
