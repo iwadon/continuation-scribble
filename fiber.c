@@ -1,5 +1,7 @@
 #include "fiber.h"
-#if defined(__aarch64__)
+#if defined(_M_ARM64)
+#include "arm64-win/arm64_ctx.h"
+#elif defined(__aarch64__)
 #include "arm64_ctx.h"
 #elif defined(__human68k__)
 #include "m68k_ctx.h"
@@ -13,7 +15,7 @@
 #include <string.h>
 
 struct fiber {
-#if defined(__aarch64__)
+#if defined(_M_ARM64) || defined(__aarch64__)
 	arm64_ctx_t ctx;
 #elif defined(__human68k__)
 	m68k_ctx_t ctx;
@@ -27,7 +29,7 @@ struct fiber {
 	fib_state_t state;
 };
 
-#if defined(__aarch64__)
+#if defined(_M_ARM64) || defined(__aarch64__)
 #define ctx_save(c) arm64_ctx_save(c)
 #define ctx_resume(c) arm64_ctx_resume(c)
 #elif defined(__human68k__)
@@ -52,7 +54,14 @@ void fiber_trampoline(void) __attribute__((noreturn));
 #endif
 
 /* --- internals --- */
-#if defined(__aarch64__)
+#if defined(_M_ARM64)
+__declspec(noreturn) static void fiber_raw_jump(const arm64_ctx_t *c);
+static void fiber_raw_jump(const arm64_ctx_t *c)
+{
+	arm64_ctx_resume(c);
+	abort();
+}
+#elif defined(__aarch64__)
 static void fiber_raw_jump(const arm64_ctx_t *c) __attribute__((noreturn));
 static void fiber_raw_jump(const arm64_ctx_t *c)
 {
@@ -143,7 +152,13 @@ int fiber_create(fiber_t **out, size_t stack_size, void (*entry)(void *), void *
 
 	/* Setup initial context: SP at top of stack, PC=fiber_trampoline. */
 	memset(&fb->ctx, 0, sizeof(fb->ctx));
-#if defined(__aarch64__)
+#if defined(_M_ARM64)
+	fb->ctx.sp = (uint64_t)(uintptr_t)((uint8_t *)fb->stack + fb->stack_size);
+	fb->ctx.lr = (uint64_t)(uintptr_t)fiber_trampoline;
+	/* Pass entry/arg via X21/X22 (safe w.r.t. arm64_ctx_resume) */
+	fb->ctx.x[2] = (uint64_t)(uintptr_t)entry;
+	fb->ctx.x[3] = (uint64_t)(uintptr_t)arg;
+#elif defined(__aarch64__)
 	fb->ctx.sp = (uint64_t)(unsigned long)(fb->stack + fb->stack_size);
 	fb->ctx.lr = (uint64_t)(unsigned long)fiber_trampoline;
 	/* Pass entry/arg via X21/X22 (safe w.r.t. arm64_ctx_resume) */

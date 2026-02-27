@@ -12,7 +12,9 @@ void cont_panic(const char *msg)
 
 static void get_stack_base(void)
 {
-#if defined(__aarch64__)
+#if defined(_MSC_VER) && defined(_M_ARM64)
+	cont_stack_base = (char *)_AddressOfReturnAddress();
+#elif defined(__aarch64__)
 	asm volatile("mov %0, sp" : "=r"(cont_stack_base));
 #elif defined(__human68k__)
 	asm volatile("move.l %%a7, %0" : "=r"(cont_stack_base));

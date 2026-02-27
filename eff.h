@@ -31,7 +31,9 @@ extern intptr_t eff_resume_val;
 
 /* Get current stack pointer (architecture-specific macro).
  * Must be a macro, not a function, to read the caller's SP even at -O0. */
-#if defined(__aarch64__)
+#if defined(_MSC_VER) && defined(_M_ARM64)
+#define EFF_GET_SP(dst) ((dst) = (char *)_AddressOfReturnAddress())
+#elif defined(__aarch64__)
 #define EFF_GET_SP(dst) asm volatile("mov %0, sp" : "=r"(dst))
 #elif defined(_MSC_VER) && defined(_M_X64)
 #define EFF_GET_SP(dst) ((dst) = (char *)_AddressOfReturnAddress())

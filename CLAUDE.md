@@ -12,6 +12,7 @@ Each architecture has its own ninja build configuration in its directory:
 
 ```bash
 ninja -C arm64      # ARM64 (macOS Apple Silicon)
+ninja -C arm64-win  # ARM64 (Windows on ARM)
 ninja -C x86_64     # x86_64 (macOS Intel)
 ninja -C m68k-xelf  # m68k (X68000 cross-compilation)
 ```
@@ -43,6 +44,7 @@ Test binaries are output to `build/{arch}/`. See README.md for specific test com
 ### Architecture-Specific Directories
 
 - `arm64/` - ARM64 Apple Silicon
+- `arm64-win/` - ARM64 Windows (MSVC/armasm64)
 - `x86_64/` - x86_64 Intel/AMD
 - `m68k-xelf/` - Motorola 68000 (X68000), includes continuation support
 

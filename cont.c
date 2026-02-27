@@ -3,8 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+
 /* Architecture-specific macros for context operations */
-#if defined(__aarch64__)
+#if defined(_M_ARM64) || defined(__aarch64__)
 #define cont_ctx_save(c) arm64_ctx_save(c)
 #define cont_ctx_resume(c) arm64_ctx_resume(c)
 #define CONT_GET_SP(ctx) ((char *)(uintptr_t)(ctx)->sp)
@@ -104,7 +105,7 @@ void __attribute__((noinline)) cont_resume_internal(const cont_t *cont)
 	cont_ctx_resume(&cont->ctx);
 }
 
-#ifdef _WIN64
+#if defined(_WIN64) || defined(_M_ARM64)
 /* External trampoline function defined in cont_trampoline.asm for Windows */
 extern void cont_resume_trampoline(char *safe_sp, const cont_t *cont,
 	void (*fn)(const cont_t *));
@@ -126,10 +127,17 @@ void cont_resume(const cont_t *cont)
 	char *target_sp = CONT_GET_SP(&cont->ctx);
 	size_t guard = cont->stack_size + 4096; /* extra space for safety */
 	char *safe_sp = target_sp - guard;
+#if !defined(__human68k__)
+	/* ARM64 and x86_64 require 16-byte SP alignment */
+	safe_sp = (char *)((uintptr_t)safe_sp & ~(uintptr_t)15);
+#endif
 
 {
 	void (*fn)(const cont_t *) = cont_resume_internal;
-#if defined(__aarch64__)
+#if defined(_M_ARM64)
+	/* Use external trampoline since MSVC doesn't support inline asm */
+	cont_resume_trampoline(safe_sp, cont, fn);
+#elif defined(__aarch64__)
 	/* Move SP down and call internal function */
 	asm volatile(
 		"mov sp, %0\n\t"

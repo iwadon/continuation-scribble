@@ -1,0 +1,65 @@
+# Build configuration for Windows ARM64 (MSVC)
+#
+# Prerequisites:
+#   - Visual Studio with C++ ARM64 workload installed
+#   - Run from "ARM64 Native Tools Command Prompt for VS"
+#   - ninja build tool (available via winget: winget install Ninja-build.Ninja)
+#
+# Usage:
+#   ninja -C arm64-win
+
+builddir = ../build/arm64-win
+
+# MSVC compiler
+cc = cl
+cflags = /nologo /W4 /Od /Zi /FS /Fd$builddir/ /I .
+
+# ARM64 assembler
+as = armasm64
+asflags = /nologo
+
+# Linker (use link.exe explicitly to avoid conflict with Unix link command)
+ld = link.exe
+ldflags = /nologo /DEBUG
+
+rule CC
+  command = $cc $cflags /c /Fo$out $in
+  description = CC $in
+
+rule AS
+  command = $as $asflags -o $out $in
+  description = AS $in
+
+rule LD
+  command = $ld $ldflags /OUT:$out $in
+  description = LINK $out
+
+# arm64_ctx_test - basic context save/resume test
+build $builddir/arm64_ctx_test.exe: LD $builddir/arm64_ctx_test.obj $builddir/arm64_ctx.obj
+build $builddir/arm64_ctx_test.obj: CC arm64_ctx_test.c
+build $builddir/arm64_ctx.obj: AS arm64_ctx.asm
+
+# fiber_test - cooperative fiber scheduling test
+build $builddir/fiber_test.exe: LD $builddir/fiber_test.obj $builddir/fiber.obj $builddir/fiber_trampoline.obj $builddir/arm64_ctx.obj $builddir/scheduler.obj
+build $builddir/fiber_test.obj: CC ../fiber_test.c
+build $builddir/fiber.obj: CC ../fiber.c
+build $builddir/fiber_trampoline.obj: AS fiber_trampoline.asm
+build $builddir/scheduler.obj: CC ../scheduler.c
+
+# cont_test - continuation save/resume test
+build $builddir/cont_test.exe: LD $builddir/cont_test.obj $builddir/cont.obj $builddir/arm64_ctx.obj $builddir/cont_trampoline.obj
+build $builddir/cont_test.obj: CC ../cont_test.c
+build $builddir/cont.obj: CC ../cont.c
+build $builddir/cont_trampoline.obj: AS cont_trampoline.asm
+
+# cont_clone_test - continuation clone test
+build $builddir/cont_clone_test.exe: LD $builddir/cont_clone_test.obj $builddir/cont.obj $builddir/arm64_ctx.obj $builddir/cont_trampoline.obj
+build $builddir/cont_clone_test.obj: CC ../cont_clone_test.c
+
+# eff_test - algebraic effects test
+build $builddir/eff_test.exe: LD $builddir/eff_test.obj $builddir/eff.obj $builddir/cont.obj $builddir/arm64_ctx.obj $builddir/cont_trampoline.obj
+build $builddir/eff_test.obj: CC ../eff_test.c
+build $builddir/eff.obj: CC ../eff.c
+
+# Default target
+default $builddir/arm64_ctx_test.exe
