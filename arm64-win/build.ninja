@@ -12,7 +12,7 @@ builddir = ../build/arm64-win
 
 # MSVC compiler
 cc = cl
-cflags = /nologo /W4 /Od /Zi /FS /Fd$builddir/ /I .
+cflags = /nologo /W4 /Od /Zi /FS /utf-8 /I .
 
 # ARM64 assembler
 as = armasm64
@@ -23,7 +23,7 @@ ld = link.exe
 ldflags = /nologo /DEBUG
 
 rule CC
-  command = $cc $cflags /c /Fo$out $in
+  command = $cc $cflags /c /Fd$builddir/ /Fo$out $in
   description = CC $in
 
 rule AS
