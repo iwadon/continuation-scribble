@@ -6,13 +6,23 @@
 
 ## サポートアーキテクチャ
 
-- **arm64-mac**: Apple Silicon (macOS)
-- **arm64-linux**: ARM64 (Linux)
-- **arm64-win**: ARM64 (Windows)
-- **x86_64-mac**: Intel/AMD (macOS)
-- **x86_64-linux**: Intel/AMD (Linux)
-- **x86_64-win**: Intel/AMD (Windows, MSVC)
-- **m68k**: Motorola 68000 (X68000、クロスコンパイル)
+- **arm64-mac**: ARM64 (M1以降のMac) / macOS / clang
+- **arm64-linux**: ARM64 / Linux / gcc
+- **arm64-win**: ARM64 / Windows / MSVC
+- **x86_64-mac**: Intel Mac / macOS / clang
+- **x86_64-linux**: x86_64 / Linux / gcc
+- **x86_64-win**: x86_64 / Windows / MSVC
+- **m68k-xelf**: X68000 / Human68k / elf2x68k + has060x.x
+
+## ビルド準備
+
+### m68k-xelf
+
+事前に`scripts/setup-x68k-tools.sh`を実行してください。m68k-xelfのビルドに必要なrun68xとhas060x.xが`m68k-xelf/tools/`ディレクトリ以下に配置されます。
+
+```shell
+% ./scripts/setup-x68k-tools.sh
+```
 
 ## ビルド方法
 

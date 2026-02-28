@@ -2,7 +2,7 @@ builddir = ../build/m68k-xelf
 
 cc = m68k-xelf-gcc
 cflags = -Wall -Wextra -O0 -I .
-as = ../../x68k/eh68.2/build/src/eh68 run ../../x68k/human68k/opt/bin/has060x.x --
+as = tools/bin/run68 -exit-on-error tools/bin/has060x.x
 asflags =
 ld = $cc
 ldflags =
@@ -10,12 +10,16 @@ libs =
 
 rule CC
   command = $cc $cflags -c -o $out $in
+  description = CC $out
 rule AS
   command = $as $asflags -o $out $in
+  description = AS $out
 rule ELF
   command = x68k2elf.py $in $out
+  description = ELF $out
 rule LD
   command = $ld $ldflags -o $out $in $libs
+  description = LD $out
 
 build $builddir/m68k_ctx_test.x: LD $builddir/m68k_ctx_test.o $builddir/m68k_ctx.o.elf
 build $builddir/m68k_ctx_test.o: CC m68k_ctx_test.c

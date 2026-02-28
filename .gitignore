@@ -75,3 +75,4 @@ dkms.conf
 
 .claude/settings.local.json
 build/
+m68k-xelf/tools/
