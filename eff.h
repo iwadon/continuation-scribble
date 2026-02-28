@@ -63,6 +63,22 @@ __attribute__((noreturn))
 void eff_resume(eff_cont_t *k, intptr_t val);
 
 /*
+ * eff_reperform(h, tag, arg, k) — propagate an effect to the outer handler.
+ *
+ * Call this from a handler (EFF_WITH block) when the current handler
+ * does not handle the given tag.  It temporarily pops the current
+ * handler, performs the effect to the next handler up the stack,
+ * and on resume restores the handler stack and resumes the original
+ * computation captured in k.
+ *
+ * h   — pointer to the current handler (the one calling reperform)
+ * tag — effect tag to propagate
+ * arg — effect argument to propagate
+ * k   — pointer to the captured continuation from the computation
+ */
+void eff_reperform(eff_handler_t *h, int tag, intptr_t arg, eff_cont_t *k);
+
+/*
  * eff_handle_end(h) — pop handler, restore cont_stack_base, clean up.
  */
 void eff_handle_end(eff_handler_t *h);

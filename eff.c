@@ -37,6 +37,28 @@ void eff_resume(eff_cont_t *k, intptr_t val)
 	/* unreachable */
 }
 
+void eff_reperform(eff_handler_t *h, int tag, intptr_t arg, eff_cont_t *k)
+{
+	/* Save the original continuation from the computation */
+	eff_cont_t saved_k;
+	cont_init(&saved_k.cont);
+	cont_clone(&saved_k.cont, &k->cont);
+
+	/* Pop self from handler stack so perform reaches the outer handler */
+	eff_handler_stack = h->prev;
+
+	/* Perform the effect to the outer handler */
+	intptr_t result = eff_perform(tag, arg);
+
+	/* Outer handler resumed us — restore self on the stack */
+	eff_handler_stack = h;
+
+	/* Resume the original computation with the value from the outer handler */
+	eff_resume_val = result;
+	cont_resume(&saved_k.cont);
+	/* unreachable */
+}
+
 void eff_handle_end(eff_handler_t *h)
 {
 	/* Pop handler from stack */
