@@ -40,6 +40,11 @@ The library is organized in layers of increasing abstraction. See README.md for 
    - Full continuation support with stack image capture/restore
    - See README.md for usage patterns and important constraints
 
+5. **Effect Handler Layer** (`eff.h`, `eff.c`):
+   - Algebraic effects using delimited continuations
+   - `EFF_HANDLE`/`EFF_WITH`/`EFF_END` macros for structured effect handling
+   - `eff_perform()` suspends computation; `eff_resume()` resumes captured continuation
+
 ### Architecture Directory Convention
 
 Each architecture has a directory named `{arch}-{platform}` (e.g., `arm64-mac`, `x86_64-linux`, `m68k-xelf`). All share the same source files (`fiber.c`, `scheduler.c`, etc.) but have architecture-specific context and trampoline assembly.

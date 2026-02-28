@@ -6,15 +6,27 @@ Experimental project exploring low-level continuation and cooperative fiber (cor
 
 ## Supported Architectures
 
-- **arm64-mac**: Apple Silicon (macOS)
-- **arm64-linux**: ARM64 (Linux)
-- **arm64-win**: ARM64 (Windows)
-- **x86_64-mac**: Intel/AMD (macOS)
-- **x86_64-linux**: Intel/AMD (Linux)
-- **x86_64-win**: Intel/AMD (Windows, MSVC)
-- **m68k-xelf**: Motorola 68000 (X68000, cross-compilation)
+- **arm64-mac**: ARM64 (M1 and later Mac) / macOS / clang
+- **arm64-linux**: ARM64 / Linux / gcc
+- **arm64-win**: ARM64 / Windows / MSVC
+- **x86_64-mac**: Intel Mac / macOS / clang
+- **x86_64-linux**: x86_64 / Linux / gcc
+- **x86_64-win**: x86_64 / Windows / MSVC
+- **m68k-xelf**: X68000 / Human68k / elf2x68k + has060x.x
+
+## Build Prerequisites
+
+### m68k-xelf
+
+Run `scripts/setup-x68k-tools.sh` beforehand. This installs run68x and has060x.x into `m68k-xelf/tools/`.
+
+```shell
+% ./scripts/setup-x68k-tools.sh
+```
 
 ## Build Instructions
+
+Building requires ninja and a C compiler toolchain.
 
 Each architecture has its own build configuration:
 
@@ -28,76 +40,25 @@ ninja -C x86_64-win   # x86_64 (Windows)
 ninja -C m68k-xelf    # m68k (X68000 cross-compilation)
 ```
 
-### Windows (x86_64-win)
-
-Requires Visual Studio with C++ workload installed.
-
-```cmd
-
-cd x86_64-win
-build_msvc.bat          # Build x86_64_ctx_test.exe (default)
-build_msvc.bat all      # Build all tests
-build_msvc.bat clean    # Clean build artifacts
-```
-
-The build script automatically sets up the MSVC environment using `vcvarsall.bat`.
-
 ## Running Tests
 
-### arm64 (native on Apple Silicon)
+Test binaries are output to `build/{arch}/`. Run pattern:
 
-```bash
-./build/arm64-mac/arm64_ctx_test
-./build/arm64-mac/fiber_test
-./build/arm64-mac/cont_test
-./build/arm64-mac/cont_clone_test
+```
+./build/{arch}/{test_name}              # Unix
+build\{arch}\{test_name}.exe            # Windows
+run68 ./build/m68k-xelf/{test_name}.x   # m68k
 ```
 
-### x86_64 (native or Rosetta 2)
+Available tests (common to all architectures):
 
-```bash
-./build/x86_64-mac/x86_64_ctx_test
-./build/x86_64-mac/fiber_test
-./build/x86_64-mac/cont_test
-./build/x86_64-mac/cont_clone_test
-```
-
-### arm64-linux (Linux ARM64)
-
-```bash
-./build/arm64-linux/arm64_ctx_test
-./build/arm64-linux/fiber_test
-./build/arm64-linux/cont_test
-./build/arm64-linux/cont_clone_test
-```
-
-### x86_64-linux (Linux x86_64)
-
-```bash
-./build/x86_64-linux/x86_64_ctx_test
-./build/x86_64-linux/fiber_test
-./build/x86_64-linux/cont_test
-./build/x86_64-linux/cont_clone_test
-```
-
-### x86_64-win (Windows)
-
-```cmd
-build\x86_64-win\x86_64_ctx_test.exe
-build\x86_64-win\fiber_test.exe
-build\x86_64-win\cont_test.exe
-build\x86_64-win\cont_clone_test.exe
-build\x86_64-win\eff_test.exe
-```
-
-### m68k (requires run68 emulator)
-
-```bash
-run68 ./build/m68k-xelf/m68k_ctx_test.x
-run68 ./build/m68k-xelf/fiber_test.x
-run68 ./build/m68k-xelf/cont_test.x
-run68 ./build/m68k-xelf/cont_clone_test.x
-```
+| Test | Description |
+|------|-------------|
+| `{arch}_ctx_test` | Context save/resume primitives |
+| `fiber_test` | Cooperative fiber creation, yielding, and scheduling |
+| `cont_test` | Continuation save/resume with stack capture |
+| `cont_clone_test` | Multi-shot continuation cloning |
+| `eff_test` | Algebraic effect handlers using delimited continuations |
 
 ## Layer Structure
 
@@ -112,9 +73,17 @@ Architecture-specific register save/restore. Similar to setjmp/longjmp semantics
 
 Cooperative userspace threads with explicit yielding. Each fiber has its own stack.
 
-### 3. Continuation Layer
+### 3. Scheduler Layer
+
+Round-robin cooperative scheduler for managing fiber execution.
+
+### 4. Continuation Layer
 
 Full continuation support with stack image capture/restore. Supports multi-shot continuations (can resume the same continuation multiple times).
+
+### 5. Effect Handler Layer
+
+Algebraic effects using delimited continuations. Provides `EFF_HANDLE`/`EFF_WITH`/`EFF_END` macros for structured effect handling.
 
 ## Using the Continuation Layer
 

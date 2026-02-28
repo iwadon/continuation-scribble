@@ -42,70 +42,23 @@ ninja -C m68k-xelf    # m68k (X68000 クロスコンパイル)
 
 ## テストの実行
 
-### arm64-mac (Apple Silicon上でネイティブ実行)
+テストバイナリは`build/{arch}/`に出力されます。実行パターン：
 
-```bash
-./build/arm64-mac/arm64_ctx_test
-./build/arm64-mac/fiber_test
-./build/arm64-mac/cont_test
-./build/arm64-mac/cont_clone_test
+```
+./build/{arch}/{test_name}              # Unix
+build\{arch}\{test_name}.exe            # Windows
+run68 ./build/m68k-xelf/{test_name}.x   # m68k
 ```
 
-### x86_64-mac (ネイティブまたはRosetta 2)
+全アーキテクチャ共通のテスト：
 
-```bash
-./build/x86_64-mac/x86_64_ctx_test
-./build/x86_64-mac/fiber_test
-./build/x86_64-mac/cont_test
-./build/x86_64-mac/cont_clone_test
-```
-
-### arm64-linux (Linux ARM64)
-
-```bash
-./build/arm64-linux/arm64_ctx_test
-./build/arm64-linux/fiber_test
-./build/arm64-linux/cont_test
-./build/arm64-linux/cont_clone_test
-```
-
-### x86_64-linux (Linux x86_64)
-
-```bash
-./build/x86_64-linux/x86_64_ctx_test
-./build/x86_64-linux/fiber_test
-./build/x86_64-linux/cont_test
-./build/x86_64-linux/cont_clone_test
-```
-
-### arm64-win (Windows ARM64)
-
-```cmd
-build\arm64-win\arm64_ctx_test.exe
-build\arm64-win\fiber_test.exe
-build\arm64-win\cont_test.exe
-build\arm64-win\cont_clone_test.exe
-build\arm64-win\eff_test.exe
-```
-
-### x86_64-win (Windows x86_64)
-
-```cmd
-build\x86_64-win\x86_64_ctx_test.exe
-build\x86_64-win\fiber_test.exe
-build\x86_64-win\cont_test.exe
-build\x86_64-win\cont_clone_test.exe
-build\x86_64-win\eff_test.exe
-```
-
-### m68k (run68エミュレータが必要)
-
-```bash
-run68 ./build/m68k-xelf/m68k_ctx_test.x
-run68 ./build/m68k-xelf/fiber_test.x
-run68 ./build/m68k-xelf/cont_test.x
-run68 ./build/m68k-xelf/cont_clone_test.x
-```
+| テスト | 説明 |
+|--------|------|
+| `{arch}_ctx_test` | コンテキスト保存・復元プリミティブ |
+| `fiber_test` | 協調的ファイバーの作成、yield、スケジューリング |
+| `cont_test` | スタックキャプチャによる継続の保存・復元 |
+| `cont_clone_test` | マルチショット継続のクローン |
+| `eff_test` | 限定継続を用いた代数的エフェクトハンドラ |
 
 ## レイヤー構造
 
@@ -120,9 +73,17 @@ run68 ./build/m68k-xelf/cont_clone_test.x
 
 明示的なyieldによる協調的ユーザースペーススレッド。各ファイバーは独自のスタックを持つ。
 
-### 3. 継続層
+### 3. スケジューラ層
+
+ラウンドロビン方式の協調的スケジューラ。ファイバーの実行を管理する。
+
+### 4. 継続層
 
 スタックイメージのキャプチャ・復元による完全な継続サポート。マルチショット継続（同じ継続を複数回再開可能）をサポート。
+
+### 5. エフェクトハンドラ層
+
+限定継続を用いた代数的エフェクト。`EFF_HANDLE`/`EFF_WITH`/`EFF_END`マクロによる構造的なエフェクトハンドリングを提供。
 
 ## 継続層の使い方
 
