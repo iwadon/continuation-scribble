@@ -43,3 +43,6 @@ build $builddir/scheduler.o: CC ../scheduler.c
 build $builddir/eff_test.x: LD $builddir/eff_test.o $builddir/eff.o $builddir/cont.o $builddir/m68k_ctx.o.elf
 build $builddir/eff_test.o: CC ../eff_test.c
 build $builddir/eff.o: CC ../eff.c
+
+build $builddir/eff_nest_test.x: LD $builddir/eff_nest_test.o $builddir/eff.o $builddir/cont.o $builddir/m68k_ctx.o.elf
+build $builddir/eff_nest_test.o: CC ../eff_nest_test.c

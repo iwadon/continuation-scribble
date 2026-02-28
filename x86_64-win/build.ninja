@@ -60,3 +60,7 @@ build $builddir/cont_clone_test.obj: CC ../cont_clone_test.c
 build $builddir/eff_test.exe: LD $builddir/eff_test.obj $builddir/eff.obj $builddir/cont.obj $builddir/x86_64_ctx.obj $builddir/cont_trampoline.obj
 build $builddir/eff_test.obj: CC ../eff_test.c
 build $builddir/eff.obj: CC ../eff.c
+
+# eff_nest_test - nested effect handler test
+build $builddir/eff_nest_test.exe: LD $builddir/eff_nest_test.obj $builddir/eff.obj $builddir/cont.obj $builddir/x86_64_ctx.obj $builddir/cont_trampoline.obj
+build $builddir/eff_nest_test.obj: CC ../eff_nest_test.c

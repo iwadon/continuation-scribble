@@ -35,3 +35,6 @@ build $builddir/cont_clone_test.o: CC ../cont_clone_test.c
 build $builddir/eff_test: LD $builddir/eff_test.o $builddir/eff.o $builddir/cont.o $builddir/x86_64_ctx.o
 build $builddir/eff_test.o: CC ../eff_test.c
 build $builddir/eff.o: CC ../eff.c
+
+build $builddir/eff_nest_test: LD $builddir/eff_nest_test.o $builddir/eff.o $builddir/cont.o $builddir/x86_64_ctx.o
+build $builddir/eff_nest_test.o: CC ../eff_nest_test.c
