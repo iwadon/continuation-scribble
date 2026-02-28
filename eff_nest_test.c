@@ -2,6 +2,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#if defined(_MSC_VER)
+#define NOINLINE __declspec(noinline)
+#else
+#define NOINLINE __attribute__((noinline))
+#endif
+
 static void cont_panic(const char *msg)
 {
 	printf("Panic: %s\n", msg);
@@ -72,7 +78,7 @@ static void computation1(void)
 	eff_perform(EFF_YIELD, 30);
 }
 
-__attribute__((noinline))
+NOINLINE
 static void test1(void)
 {
 	printf("=== Test 1: Inner handles YIELD, outer handles LOG ===\n");
@@ -128,7 +134,7 @@ static void computation2(void)
 	eff_perform(EFF_YIELD, 3);
 }
 
-__attribute__((noinline))
+NOINLINE
 static void test2(void)
 {
 	printf("=== Test 2: Inner passes all effects through ===\n");
@@ -189,7 +195,7 @@ static void computation3(void)
 	eff_perform(EFF_YIELD, 3);
 }
 
-__attribute__((noinline))
+NOINLINE
 static void test3(void)
 {
 	printf("=== Test 3: Three-level nesting (YIELD/LOG/RAISE) ===\n");
@@ -260,7 +266,7 @@ static void computation4(void)
 	eff_perform(EFF_YIELD, 15);
 }
 
-__attribute__((noinline))
+NOINLINE
 static void test4(void)
 {
 	printf("=== Test 4: Inner transforms values before propagation ===\n");
@@ -312,7 +318,7 @@ static void computation5(void)
 	results5[2] = eff_perform(EFF_LOG, 300);
 }
 
-__attribute__((noinline))
+NOINLINE
 static void test5(void)
 {
 	printf("=== Test 5: Resume value flows back through reperform ===\n");

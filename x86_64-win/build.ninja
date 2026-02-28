@@ -18,8 +18,7 @@ cflags = /nologo /W4 /Od /Zi /FS /utf-8 /I .
 as = ml64
 asflags = /nologo /c /Zi
 
-# Linker (use link.exe explicitly to avoid conflict with Unix link command)
-ld = link.exe
+# Linker: use cl to invoke the linker, avoiding Unix link command conflict
 ldflags = /nologo /DEBUG
 
 rule CC
@@ -31,7 +30,7 @@ rule AS
   description = AS $in
 
 rule LD
-  command = $ld $ldflags /OUT:$out $in
+  command = $cc /nologo /Fe$out $in /link $ldflags
   description = LINK $out
 
 # x86_64_ctx_test - basic context save/resume test
