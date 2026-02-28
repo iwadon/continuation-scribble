@@ -9,12 +9,14 @@
 - **arm64-mac**: Apple Silicon (macOS)
 - **arm64-linux**: ARM64 (Linux)
 - **arm64-win**: ARM64 (Windows)
-- **x86_64**: Intel/AMD (macOS)
+- **x86_64-mac**: Intel/AMD (macOS)
 - **x86_64-linux**: Intel/AMD (Linux)
 - **x86_64-win**: Intel/AMD (Windows, MSVC)
 - **m68k**: Motorola 68000 (X68000、クロスコンパイル)
 
 ## ビルド方法
+
+ビルドにはninja、およびCコンパイラなどの開発ツールが必要です。
 
 各アーキテクチャごとにninjaビルド設定があります：
 
@@ -22,28 +24,15 @@
 ninja -C arm64-mac    # ARM64 (macOS Apple Silicon)
 ninja -C arm64-linux  # ARM64 (Linux)
 ninja -C arm64-win    # ARM64 (Windows)
-ninja -C x86_64       # x86_64 (macOS Intel)
+ninja -C x86_64-mac   # x86_64 (macOS Intel)
 ninja -C x86_64-linux # x86_64 (Linux)
 ninja -C x86_64-win   # x86_64 (Windows)
 ninja -C m68k-xelf    # m68k (X68000 クロスコンパイル)
 ```
 
-### Windows (x86_64-win)
-
-Visual StudioのC++ワークロードが必要です。
-
-```cmd
-cd x86_64-win
-build_msvc.bat          # x86_64_ctx_test.exeをビルド (デフォルト)
-build_msvc.bat all      # 全テストをビルド
-build_msvc.bat clean    # ビルド成果物をクリーン
-```
-
-ビルドスクリプトは`vcvarsall.bat`を使用してMSVC環境を自動設定します。
-
 ## テストの実行
 
-### arm64 (Apple Silicon上でネイティブ実行)
+### arm64-mac (Apple Silicon上でネイティブ実行)
 
 ```bash
 ./build/arm64-mac/arm64_ctx_test
@@ -52,7 +41,7 @@ build_msvc.bat clean    # ビルド成果物をクリーン
 ./build/arm64-mac/cont_clone_test
 ```
 
-### x86_64 (ネイティブまたはRosetta 2)
+### x86_64-mac (ネイティブまたはRosetta 2)
 
 ```bash
 ./build/x86_64-mac/x86_64_ctx_test
@@ -79,7 +68,17 @@ build_msvc.bat clean    # ビルド成果物をクリーン
 ./build/x86_64-linux/cont_clone_test
 ```
 
-### x86_64-win (Windows)
+### arm64-win (Windows ARM64)
+
+```cmd
+build\arm64-win\arm64_ctx_test.exe
+build\arm64-win\fiber_test.exe
+build\arm64-win\cont_test.exe
+build\arm64-win\cont_clone_test.exe
+build\arm64-win\eff_test.exe
+```
+
+### x86_64-win (Windows x86_64)
 
 ```cmd
 build\x86_64-win\x86_64_ctx_test.exe
