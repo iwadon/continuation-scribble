@@ -39,8 +39,13 @@ void eff_resume(eff_cont_t *k, intptr_t val)
 
 void eff_reperform(eff_handler_t *h, int tag, intptr_t arg, eff_cont_t *k)
 {
-	/* Save the original continuation from the computation */
-	eff_cont_t saved_k;
+	/*
+	 * Save the original continuation from the computation.
+	 * Must be static: cont_resume restores the stack image, so a
+	 * local variable here would be overwritten before ctx_resume
+	 * can read the saved registers.
+	 */
+	static eff_cont_t saved_k;
 	cont_init(&saved_k.cont);
 	cont_clone(&saved_k.cont, &k->cont);
 
